@@ -178,6 +178,15 @@ class AppLFr extends AppL {
   String get qualityCd => 'CD (44.1 kHz / 16 bit)';
 
   @override
+  String get maxFrequency => 'Fréquence max';
+
+  @override
+  String get maxBitDepth => 'Profondeur max';
+
+  @override
+  String get noLimit => 'Sans limite';
+
+  @override
   String get streamingServices => 'Services de streaming';
 
   @override

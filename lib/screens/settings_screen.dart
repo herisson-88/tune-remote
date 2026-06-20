@@ -247,19 +247,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-/// Streaming quality tiers (cap the sample rate / bit depth requested from
-/// services). Mirrors the web app's Maximum / Hi-Res / CD presets.
+/// Caps the streaming sample rate and bit depth INDEPENDENTLY (DACs vary a lot),
+/// written to the server's max_sample_rate / max_bit_depth config.
 class _StreamQuality extends StatelessWidget {
   const _StreamQuality();
 
-  // (sampleRate Hz, bitDepth)
-  static const _tiers = [(384000, 32), (192000, 24), (44100, 16)];
+  static const _rates = [44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000];
+  static const _depths = [16, 24, 32];
 
-  int _tierIndex(int sampleRate) {
-    if (sampleRate >= 352800) return 0;
-    if (sampleRate >= 88200) return 1;
-    return 2;
+  String _rateLabel(int hz) {
+    final khz = hz / 1000;
+    final s = khz % 1 == 0 ? khz.toStringAsFixed(0) : khz.toStringAsFixed(1);
+    return '$s kHz';
   }
+
+  /// Snap an arbitrary server value to the closest offered option.
+  int _closest(List<int> options, int value) => options.reduce(
+      (a, b) => (a - value).abs() <= (b - value).abs() ? a : b);
 
   @override
   Widget build(BuildContext context) {
@@ -272,26 +276,45 @@ class _StreamQuality extends StatelessWidget {
         child: Text(t.loading, style: const TextStyle(color: Colors.white54)),
       );
     }
-    final labels = [t.qualityMax, t.qualityHires, t.qualityCd];
-    final current = _tierIndex(cfg.maxSampleRate);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(child: Text(t.freqLimit)),
+    final rate = _closest(_rates, cfg.maxSampleRate);
+    final depth = _closest(_depths, cfg.maxBitDepth);
+
+    Widget row(String label, Widget dropdown) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            children: [Expanded(child: Text(label)), dropdown],
+          ),
+        );
+
+    return Column(
+      children: [
+        row(
+          t.maxFrequency,
           DropdownButton<int>(
-            value: current,
-            onChanged: (i) {
-              if (i == null) return;
-              app.setStreamQuality(_tiers[i].$1, _tiers[i].$2);
+            value: rate,
+            onChanged: (v) {
+              if (v != null) app.setStreamQuality(v, cfg.maxBitDepth);
             },
             items: [
-              for (var i = 0; i < _tiers.length; i++)
-                DropdownMenuItem(value: i, child: Text(labels[i])),
+              for (final r in _rates)
+                DropdownMenuItem(value: r, child: Text(_rateLabel(r))),
             ],
           ),
-        ],
-      ),
+        ),
+        row(
+          t.maxBitDepth,
+          DropdownButton<int>(
+            value: depth,
+            onChanged: (v) {
+              if (v != null) app.setStreamQuality(cfg.maxSampleRate, v);
+            },
+            items: [
+              for (final d in _depths)
+                DropdownMenuItem(value: d, child: Text('$d-bit')),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

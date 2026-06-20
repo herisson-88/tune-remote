@@ -175,6 +175,15 @@ class AppLKo extends AppL {
   String get qualityCd => 'CD(44.1 kHz / 16비트)';
 
   @override
+  String get maxFrequency => '최대 주파수';
+
+  @override
+  String get maxBitDepth => '최대 비트 심도';
+
+  @override
+  String get noLimit => '제한 없음';
+
+  @override
   String get streamingServices => '스트리밍 서비스';
 
   @override

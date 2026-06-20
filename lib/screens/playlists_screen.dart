@@ -48,34 +48,37 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _loadedSig = _authSig(app); // claim the load now to avoid double-trigger
     });
+    final streaming = <Playlist>[];
+    String? firstError;
+
+    // Streaming services — publish each as soon as it returns, so Qobuz shows
+    // up immediately even if another service is slow.
+    for (final s in app.services.values) {
+      if (!(s.enabled && s.authenticated)) continue;
+      try {
+        streaming.addAll(await c.streamingPlaylists(s.name));
+        if (mounted) setState(() => _streaming = List.of(streaming));
+      } catch (e) {
+        firstError ??= e.toString();
+      }
+    }
     try {
-      final streaming = <Playlist>[];
-      for (final s in app.services.values) {
-        if (s.enabled && s.authenticated) {
-          try {
-            streaming.addAll(await c.streamingPlaylists(s.name));
-          } catch (_) {}
-        }
-      }
-      try {
-        streaming.addAll(await c.localPlaylists());
-      } catch (_) {}
-      List<Playlist> smart = const [];
-      try {
-        smart = await c.smartPlaylists();
-      } catch (_) {}
-      if (mounted) {
-        setState(() {
-          _streaming = streaming;
-          _smart = smart;
-          _loadedSig = _authSig(app);
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
-    } finally {
-      if (mounted) setState(() => _loading = false);
+      streaming.addAll(await c.localPlaylists());
+    } catch (_) {}
+    try {
+      final smart = await c.smartPlaylists();
+      if (mounted) setState(() => _smart = smart);
+    } catch (_) {}
+
+    if (mounted) {
+      setState(() {
+        _streaming = streaming;
+        _loading = false;
+        // Only surface an error if nothing at all could be loaded.
+        if (streaming.isEmpty && _smart.isEmpty) _error = firstError;
+      });
     }
   }
 

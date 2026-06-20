@@ -175,6 +175,15 @@ class AppLJa extends AppL {
   String get qualityCd => 'CD（44.1 kHz / 16ビット）';
 
   @override
+  String get maxFrequency => '最大周波数';
+
+  @override
+  String get maxBitDepth => '最大ビット深度';
+
+  @override
+  String get noLimit => '制限なし';
+
+  @override
   String get streamingServices => 'ストリーミングサービス';
 
   @override

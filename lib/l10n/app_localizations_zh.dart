@@ -174,6 +174,15 @@ class AppLZh extends AppL {
   String get qualityCd => 'CD（44.1 kHz / 16 位）';
 
   @override
+  String get maxFrequency => '最高频率';
+
+  @override
+  String get maxBitDepth => '最高位深';
+
+  @override
+  String get noLimit => '无限制';
+
+  @override
   String get streamingServices => '流媒体服务';
 
   @override

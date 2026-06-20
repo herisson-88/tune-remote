@@ -1,13 +1,14 @@
 <div align="center">
 
-# 🎵 Tune Android Remote
+# 🎵 Tune Remote
 
 **A clean, native remote control for your [Tune Server](https://github.com/renesenses/tune-server-rust) music system.**
 
 Search · Stream · Curate — from your phone, in your language.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
-[![Platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS-3DDC84?logo=android&logoColor=white)](#)
+[![Android](https://img.shields.io/badge/Android-tested-3DDC84?logo=android&logoColor=white)](#)
+[![iOS](https://img.shields.io/badge/iOS-builds%2C%20untested-lightgrey?logo=apple&logoColor=white)](#-platforms)
 [![Languages](https://img.shields.io/badge/i18n-8%20languages-6C5CE7)](#-languages)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -33,6 +34,17 @@ the official web UI does, but as a polished native mobile app.
 
 No accounts, tokens or passwords are ever stored in this app: streaming
 credentials live **server-side only**.
+
+---
+
+## 📱 Platforms
+
+Built with Flutter, so it targets **Android and iOS** from a single codebase.
+
+- ✅ **Android** — developed and tested on device.
+- 🧪 **iOS** — compiles from the same code but is **not tested yet**. It should
+  work, and iOS users are very welcome to try it and report back — just know it
+  hasn't been validated on real hardware. Feedback and PRs appreciated!
 
 ---
 
@@ -94,10 +106,10 @@ from the server; it keeps no music database of its own.
 
 ### Run
 ```bash
-git clone https://github.com/herisson-88/tune-android-remote.git
-cd tune-android-remote
+git clone https://github.com/herisson-88/tune-remote.git
+cd tune-remote
 flutter pub get
-flutter run            # Android device/emulator or iOS simulator
+flutter run            # Android device/emulator (or iOS — untested)
 ```
 
 ### Configure

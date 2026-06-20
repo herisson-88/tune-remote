@@ -1,12 +1,14 @@
-# CLAUDE.md — Tune Android Remote
+# CLAUDE.md — Tune Remote
 
 Guidance for AI assistants working in this repository. Keep it tidy, keep it
 honest, and **never commit credentials**.
 
 ## What this is
 
-A **pure remote** Flutter client (Android + iOS) for the
-[Tune Server](https://github.com/renesenses/tune-server-rust) backend. The app
+A **pure remote** Flutter client for the
+[Tune Server](https://github.com/renesenses/tune-server-rust) backend.
+Targets **Android** (developed & tested) and **iOS** (compiles from the same
+codebase but **not tested on device** yet — say so in user-facing copy). The app
 plays nothing itself — it drives the server and its renderers over the Tune REST
 API (`http://<host>:<port>/api/v1/...`), the same contract the official web app
 and [tune-server-flutter](https://github.com/renesenses/tune-server-flutter)

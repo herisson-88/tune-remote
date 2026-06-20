@@ -178,6 +178,15 @@ class AppLDe extends AppL {
   String get qualityCd => 'CD (44.1 kHz / 16 Bit)';
 
   @override
+  String get maxFrequency => 'Max. Frequenz';
+
+  @override
+  String get maxBitDepth => 'Max. Bit-Tiefe';
+
+  @override
+  String get noLimit => 'Ohne Limit';
+
+  @override
   String get streamingServices => 'Streaming-Dienste';
 
   @override

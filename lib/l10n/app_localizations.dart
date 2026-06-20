@@ -427,6 +427,24 @@ abstract class AppL {
   /// **'CD (44.1 kHz / 16 bit)'**
   String get qualityCd;
 
+  /// No description provided for @maxFrequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Max frequency'**
+  String get maxFrequency;
+
+  /// No description provided for @maxBitDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Max bit depth'**
+  String get maxBitDepth;
+
+  /// No description provided for @noLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'No limit'**
+  String get noLimit;
+
   /// No description provided for @streamingServices.
   ///
   /// In en, this message translates to:

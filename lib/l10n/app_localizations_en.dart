@@ -177,6 +177,15 @@ class AppLEn extends AppL {
   String get qualityCd => 'CD (44.1 kHz / 16 bit)';
 
   @override
+  String get maxFrequency => 'Max frequency';
+
+  @override
+  String get maxBitDepth => 'Max bit depth';
+
+  @override
+  String get noLimit => 'No limit';
+
+  @override
   String get streamingServices => 'Streaming services';
 
   @override

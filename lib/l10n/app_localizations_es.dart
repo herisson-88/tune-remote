@@ -178,6 +178,15 @@ class AppLEs extends AppL {
   String get qualityCd => 'CD (44.1 kHz / 16 bits)';
 
   @override
+  String get maxFrequency => 'Frecuencia máx.';
+
+  @override
+  String get maxBitDepth => 'Profundidad máx.';
+
+  @override
+  String get noLimit => 'Sin límite';
+
+  @override
   String get streamingServices => 'Servicios de streaming';
 
   @override

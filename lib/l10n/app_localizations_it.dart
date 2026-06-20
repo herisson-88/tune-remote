@@ -177,6 +177,15 @@ class AppLIt extends AppL {
   String get qualityCd => 'CD (44.1 kHz / 16 bit)';
 
   @override
+  String get maxFrequency => 'Frequenza max';
+
+  @override
+  String get maxBitDepth => 'Profondità max';
+
+  @override
+  String get noLimit => 'Nessun limite';
+
+  @override
   String get streamingServices => 'Servizi di streaming';
 
   @override
