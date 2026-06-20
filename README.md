@@ -50,7 +50,7 @@ Built with Flutter, so it targets **Android and iOS** from a single codebase.
 
 ## 🎯 Features
 
-- 🔎 **Federated search** across Qobuz, YouTube, Tidal… and your local library,
+- 🔎 **Federated search** across Qobuz, YouTube and your local library,
   with a **per-source target selector** (search everything, or just one service).
 - 💜 **Favorites** — add / remove tracks, albums and artists; browse them grouped
   by service with Artists / Albums / Tracks tabs.
@@ -67,6 +67,16 @@ Built with Flutter, so it targets **Android and iOS** from a single codebase.
   rail and width-capped content.
 - 🟢 **Now-playing everywhere** — the currently playing track is highlighted in
   every list (search, albums, playlists, favorites).
+
+### Streaming services
+
+- ✅ **Qobuz** (username / password), **YouTube** (no login) and your **local
+  library** are supported.
+- 🚫 **Tidal** and **Spotify** are **not available as of today**: Tune Server has
+  **no working auth flow** for them — Tidal's embedded OAuth client is rejected
+  by Tidal, and Spotify requires per-user developer credentials with a redirect
+  that a remote app can't satisfy. They are therefore hidden in the app until the
+  upstream server ships a usable flow.
 
 ---
 

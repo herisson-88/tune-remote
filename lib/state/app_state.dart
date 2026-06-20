@@ -159,7 +159,10 @@ class AppState extends ChangeNotifier {
         ]);
         _zones = results[0] as List<Zone>;
         _devices = results[1] as List<Device>;
-        _services = results[2] as Map<String, StreamingServiceInfo>;
+        _services = results[2] as Map<String, StreamingServiceInfo>
+          // Hidden: OAuth services that can't work from a remote client
+          // (Tidal client rejected by Tidal; Spotify needs a per-user dev app).
+          ..removeWhere((k, _) => k == 'tidal' || k == 'spotify');
         if (currentZone != null) _currentZoneId = currentZone!.id;
         _startPolling();
         unawaited(loadFavorites());
