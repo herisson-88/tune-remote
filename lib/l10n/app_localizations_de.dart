@@ -222,6 +222,72 @@ class AppLDe extends AppL {
   String get metadataSaved => 'Metadaten gespeichert';
 
   @override
+  String get localLibrary => 'Lokale Bibliothek';
+
+  @override
+  String get localLibraryDesc => 'Ordner, die der Server nach Musik durchsucht';
+
+  @override
+  String get musicFolders => 'Gescannte Ordner';
+
+  @override
+  String get addFolder => 'Ordner hinzufügen';
+
+  @override
+  String get noFolders => 'Kein Ordner konfiguriert';
+
+  @override
+  String get runScan => 'Bibliothek scannen';
+
+  @override
+  String get scanning => 'Scannt…';
+
+  @override
+  String get pickFolder => 'Ordner auswählen';
+
+  @override
+  String get addThisFolder => 'Diesen Ordner hinzufügen';
+
+  @override
+  String get createPlaylist => 'Playlist erstellen';
+
+  @override
+  String get playlistName => 'Playlist-Name';
+
+  @override
+  String get create => 'Erstellen';
+
+  @override
+  String get addToPlaylist => 'Zu einer Playlist hinzufügen';
+
+  @override
+  String get newPlaylist => 'Neue Playlist';
+
+  @override
+  String get playlistCreated => 'Playlist erstellt';
+
+  @override
+  String get addedToPlaylist => 'Zur Playlist hinzugefügt';
+
+  @override
+  String get delete => 'Löschen';
+
+  @override
+  String get deletePlaylist => 'Playlist löschen';
+
+  @override
+  String get deletePlaylistConfirm => 'Diese Playlist löschen?';
+
+  @override
+  String get playlistDeleted => 'Playlist gelöscht';
+
+  @override
+  String get trackRemoved => 'Aus Playlist entfernt';
+
+  @override
+  String get removeFromPlaylist => 'Aus Playlist entfernen';
+
+  @override
   String get logIn => 'Anmelden';
 
   @override

@@ -511,6 +511,138 @@ abstract class AppL {
   /// **'Metadata saved'**
   String get metadataSaved;
 
+  /// No description provided for @localLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Local library'**
+  String get localLibrary;
+
+  /// No description provided for @localLibraryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Folders the server scans for music'**
+  String get localLibraryDesc;
+
+  /// No description provided for @musicFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned folders'**
+  String get musicFolders;
+
+  /// No description provided for @addFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a folder'**
+  String get addFolder;
+
+  /// No description provided for @noFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'No folder configured'**
+  String get noFolders;
+
+  /// No description provided for @runScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan library'**
+  String get runScan;
+
+  /// No description provided for @scanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning…'**
+  String get scanning;
+
+  /// No description provided for @pickFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a folder'**
+  String get pickFolder;
+
+  /// No description provided for @addThisFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this folder'**
+  String get addThisFolder;
+
+  /// No description provided for @createPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a playlist'**
+  String get createPlaylist;
+
+  /// No description provided for @playlistName.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist name'**
+  String get playlistName;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @addToPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to a playlist'**
+  String get addToPlaylist;
+
+  /// No description provided for @newPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'New playlist'**
+  String get newPlaylist;
+
+  /// No description provided for @playlistCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist created'**
+  String get playlistCreated;
+
+  /// No description provided for @addedToPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to playlist'**
+  String get addedToPlaylist;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @deletePlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete playlist'**
+  String get deletePlaylist;
+
+  /// No description provided for @deletePlaylistConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this playlist?'**
+  String get deletePlaylistConfirm;
+
+  /// No description provided for @playlistDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist deleted'**
+  String get playlistDeleted;
+
+  /// No description provided for @trackRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from playlist'**
+  String get trackRemoved;
+
+  /// No description provided for @removeFromPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from playlist'**
+  String get removeFromPlaylist;
+
   /// No description provided for @logIn.
   ///
   /// In en, this message translates to:

@@ -219,6 +219,72 @@ class AppLJa extends AppL {
   String get metadataSaved => 'メタデータを保存しました';
 
   @override
+  String get localLibrary => 'ローカルライブラリ';
+
+  @override
+  String get localLibraryDesc => 'サーバーが音楽を探すフォルダ';
+
+  @override
+  String get musicFolders => 'スキャン対象フォルダ';
+
+  @override
+  String get addFolder => 'フォルダを追加';
+
+  @override
+  String get noFolders => 'フォルダが未設定です';
+
+  @override
+  String get runScan => 'ライブラリをスキャン';
+
+  @override
+  String get scanning => 'スキャン中…';
+
+  @override
+  String get pickFolder => 'フォルダを選択';
+
+  @override
+  String get addThisFolder => 'このフォルダを追加';
+
+  @override
+  String get createPlaylist => 'プレイリストを作成';
+
+  @override
+  String get playlistName => 'プレイリスト名';
+
+  @override
+  String get create => '作成';
+
+  @override
+  String get addToPlaylist => 'プレイリストに追加';
+
+  @override
+  String get newPlaylist => '新規プレイリスト';
+
+  @override
+  String get playlistCreated => 'プレイリストを作成しました';
+
+  @override
+  String get addedToPlaylist => 'プレイリストに追加しました';
+
+  @override
+  String get delete => '削除';
+
+  @override
+  String get deletePlaylist => 'プレイリストを削除';
+
+  @override
+  String get deletePlaylistConfirm => 'このプレイリストを削除しますか？';
+
+  @override
+  String get playlistDeleted => 'プレイリストを削除しました';
+
+  @override
+  String get trackRemoved => 'プレイリストから削除しました';
+
+  @override
+  String get removeFromPlaylist => 'プレイリストから削除';
+
+  @override
   String get logIn => 'ログイン';
 
   @override

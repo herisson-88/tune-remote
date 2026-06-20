@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../state/app_state.dart';
 import '../widgets/responsive.dart';
 import '../widgets/services_section.dart';
+import 'library_screen.dart';
 import 'metadata_screen.dart';
 
 /// Languages offered in Settings (matches the web app's locales).
@@ -186,6 +187,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
 
             const Divider(height: 32),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.library_music_outlined),
+              title: Text(t.localLibrary),
+              subtitle: Text(t.localLibraryDesc),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const LibraryScreen())),
+            ),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.label_outline),

@@ -219,6 +219,72 @@ class AppLKo extends AppL {
   String get metadataSaved => '메타데이터 저장됨';
 
   @override
+  String get localLibrary => '로컬 라이브러리';
+
+  @override
+  String get localLibraryDesc => '서버가 음악을 검색하는 폴더';
+
+  @override
+  String get musicFolders => '스캔된 폴더';
+
+  @override
+  String get addFolder => '폴더 추가';
+
+  @override
+  String get noFolders => '구성된 폴더 없음';
+
+  @override
+  String get runScan => '라이브러리 스캔';
+
+  @override
+  String get scanning => '스캔 중…';
+
+  @override
+  String get pickFolder => '폴더 선택';
+
+  @override
+  String get addThisFolder => '이 폴더 추가';
+
+  @override
+  String get createPlaylist => '재생목록 만들기';
+
+  @override
+  String get playlistName => '재생목록 이름';
+
+  @override
+  String get create => '만들기';
+
+  @override
+  String get addToPlaylist => '재생목록에 추가';
+
+  @override
+  String get newPlaylist => '새 재생목록';
+
+  @override
+  String get playlistCreated => '재생목록 생성됨';
+
+  @override
+  String get addedToPlaylist => '재생목록에 추가됨';
+
+  @override
+  String get delete => '삭제';
+
+  @override
+  String get deletePlaylist => '재생목록 삭제';
+
+  @override
+  String get deletePlaylistConfirm => '이 재생목록을 삭제할까요?';
+
+  @override
+  String get playlistDeleted => '재생목록 삭제됨';
+
+  @override
+  String get trackRemoved => '재생목록에서 제거됨';
+
+  @override
+  String get removeFromPlaylist => '재생목록에서 제거';
+
+  @override
   String get logIn => '로그인';
 
   @override

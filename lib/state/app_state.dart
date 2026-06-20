@@ -263,12 +263,28 @@ class AppState extends ChangeNotifier {
   }
 
   // ── Favorites ──────────────────────────────────────────────────────
+  int _profileId = 1; // local (library) favorites profile
+  int get profileId => _profileId;
+
+  /// Bumps whenever the favorites set changes, so screens can reload.
+  int _favVersion = 0;
+  int get favVersion => _favVersion;
+
   String _favKey(String source, String type, String id) => '$source|$type|$id';
+
+  /// Local favorites use SINGULAR item types; streaming use plural.
+  static String singularType(String type) => switch (type) {
+        'tracks' => 'track',
+        'albums' => 'album',
+        'artists' => 'artist',
+        _ => type,
+      };
 
   bool isFavorite(String source, String type, String id) =>
       _favs.contains(_favKey(source, type, id));
 
-  /// Load every authenticated service's favorite IDs into [_favs].
+  /// Load favorite IDs into [_favs]: every authenticated streaming service,
+  /// plus the local library (profile-scoped).
   Future<void> loadFavorites() async {
     final c = _client;
     if (c == null || !_connected) return;
@@ -286,18 +302,29 @@ class AppState extends ChangeNotifier {
         } catch (_) {}
       }
     }
+    // Local library favorites (active profile).
+    try {
+      _profileId = await c.activeProfileId();
+      for (final type in const ['tracks', 'albums', 'artists']) {
+        final ids = await c.localFavoriteIds(_profileId, singularType(type));
+        for (final id in ids) {
+          keys.add(_favKey('local', type, id.toString()));
+        }
+      }
+    } catch (_) {}
     _favs
       ..clear()
       ..addAll(keys);
+    _favVersion++;
     notifyListeners();
   }
 
   /// Add or remove a favorite (optimistic, reverts on error).
+  /// Routes local items to the profile favorites API, streaming items to the
+  /// per-service favorites API.
   Future<void> toggleFavorite(String source, String type, String id) async {
     final c = _client;
-    if (c == null || source.isEmpty || source == 'local' || source == 'smart' || id.isEmpty) {
-      return;
-    }
+    if (c == null || source.isEmpty || source == 'smart' || id.isEmpty) return;
     final key = _favKey(source, type, id);
     final was = _favs.contains(key);
     if (was) {
@@ -307,11 +334,22 @@ class AppState extends ChangeNotifier {
     }
     notifyListeners();
     try {
-      if (was) {
+      if (source == 'local') {
+        final itemId = int.tryParse(id);
+        if (itemId == null) throw Exception('Identifiant local invalide');
+        final st = singularType(type);
+        if (was) {
+          await c.removeLocalFavorite(_profileId, st, itemId);
+        } else {
+          await c.addLocalFavorite(_profileId, st, itemId);
+        }
+      } else if (was) {
         await c.removeFavorite(source, type, id);
       } else {
         await c.addFavorite(source, type, id);
       }
+      _favVersion++;
+      notifyListeners();
     } catch (e) {
       if (was) {
         _favs.add(key);
@@ -357,7 +395,13 @@ class AppState extends ChangeNotifier {
     final c = _client;
     final z = currentZone;
     if (c == null || z == null) throw Exception('Aucune zone/sortie sélectionnée');
-    await c.playStreamingTrack(z.id, t.source, t.sourceId);
+    if (t.source == 'local') {
+      final id = int.tryParse(t.sourceId);
+      if (id == null) throw Exception('Identifiant de piste locale invalide');
+      await c.playLocalTracks(z.id, [id]);
+    } else {
+      await c.playStreamingTrack(z.id, t.source, t.sourceId);
+    }
     await _pollZones();
   }
 
@@ -365,7 +409,23 @@ class AppState extends ChangeNotifier {
     final c = _client;
     final z = currentZone;
     if (c == null || z == null) throw Exception('Aucune zone/sortie sélectionnée');
-    await c.playTracks(z.id, tracks, startIndex: startIndex);
+    if (tracks.isEmpty) return;
+    // Local tracks play by integer ID via a single /play call; streaming
+    // tracks use the play-first-then-queue path.
+    if (tracks.first.source == 'local') {
+      final start = startIndex.clamp(0, tracks.length - 1);
+      final ordered = <Track>[
+        for (var i = start; i < tracks.length; i++) tracks[i],
+        for (var i = 0; i < start; i++) tracks[i],
+      ];
+      final ids = ordered
+          .map((t) => int.tryParse(t.sourceId))
+          .whereType<int>()
+          .toList();
+      if (ids.isNotEmpty) await c.playLocalTracks(z.id, ids);
+    } else {
+      await c.playTracks(z.id, tracks, startIndex: startIndex);
+    }
     await _pollZones();
   }
 
@@ -373,8 +433,9 @@ class AppState extends ChangeNotifier {
     final c = _client;
     final z = currentZone;
     if (c == null || z == null) throw Exception('Aucune zone/sortie sélectionnée');
-    final tracks = await c.streamingAlbumTracks(a.source, a.sourceId);
-    await c.playTracks(z.id, tracks);
-    await _pollZones();
+    final tracks = a.source == 'local'
+        ? await c.localAlbumTracks(a.sourceId)
+        : await c.streamingAlbumTracks(a.source, a.sourceId);
+    await playTracks(tracks);
   }
 }

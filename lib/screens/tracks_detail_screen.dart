@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../state/app_state.dart';
 import '../widgets/cover.dart';
 import '../widgets/favorite_button.dart';
+import '../widgets/mini_player.dart';
 import '../widgets/responsive.dart';
 import '../widgets/track_tile.dart';
 
@@ -21,6 +22,11 @@ class TracksDetailScreen extends StatefulWidget {
   final String? favoriteType; // 'albums' | 'playlists'
   final String? favoriteId;
 
+  /// Editable-playlist hooks. When set, a delete action and per-track remove
+  /// (via the track ⋮ menu) are shown.
+  final Future<void> Function()? onDelete;
+  final Future<void> Function(int index, Track track)? onRemoveTrack;
+
   const TracksDetailScreen({
     super.key,
     required this.title,
@@ -30,6 +36,8 @@ class TracksDetailScreen extends StatefulWidget {
     this.favoriteSource,
     this.favoriteType,
     this.favoriteId,
+    this.onDelete,
+    this.onRemoveTrack,
   });
 
   @override
@@ -67,6 +75,46 @@ class _TracksDetailScreenState extends State<TracksDetailScreen> {
     }
   }
 
+  Future<void> _removeTrack(int index, Track track) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final t = AppL.of(context);
+    setState(() => _tracks = List.of(_tracks!)..remove(track));
+    try {
+      await widget.onRemoveTrack!(index, track);
+      messenger.showSnackBar(SnackBar(content: Text(t.trackRemoved)));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(t.errorWith('$e'))));
+      await _load(); // restore authoritative list on failure
+    }
+  }
+
+  Future<void> _confirmDelete() async {
+    final t = AppL.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.deletePlaylist),
+        content: Text(t.deletePlaylistConfirm),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false), child: Text(t.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true), child: Text(t.delete)),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await widget.onDelete!();
+      navigator.pop(true);
+      messenger.showSnackBar(SnackBar(content: Text(t.playlistDeleted)));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(t.errorWith('$e'))));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final tracks = _tracks;
@@ -80,6 +128,12 @@ class _TracksDetailScreenState extends State<TracksDetailScreen> {
               source: widget.favoriteSource ?? '',
               type: widget.favoriteType!,
               id: widget.favoriteId!,
+            ),
+          if (widget.onDelete != null)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: t.deletePlaylist,
+              onPressed: _confirmDelete,
             ),
         ],
       ),
@@ -134,11 +188,15 @@ class _TracksDetailScreenState extends State<TracksDetailScreen> {
                         TrackTile(
                           track: tracks[i],
                           onTap: () => _playAll(i),
+                          onRemove: widget.onRemoveTrack == null
+                              ? null
+                              : () => _removeTrack(i, tracks[i]),
                         ),
                     const SizedBox(height: 24),
                   ],
                   ),
                 ),
+      bottomNavigationBar: const MiniPlayer(),
     );
   }
 }

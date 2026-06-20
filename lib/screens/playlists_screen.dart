@@ -5,6 +5,7 @@ import '../api/models.dart';
 import '../l10n/app_localizations.dart';
 import '../state/app_state.dart';
 import '../widgets/cover.dart';
+import '../widgets/playlist_actions.dart';
 import '../widgets/responsive.dart';
 import '../widgets/track_tile.dart';
 import 'playlist_detail.dart';
@@ -14,7 +15,9 @@ const _sourceLabels = {
   'youtube': 'YouTube',
   'tidal': 'Tidal',
   'deezer': 'Deezer',
-  'local': 'Bibliothèque',
+  'spotify': 'Spotify',
+  'amazon': 'Amazon Music',
+  'amazon_music': 'Amazon Music',
 };
 
 class PlaylistsScreen extends StatefulWidget {
@@ -82,8 +85,16 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
     }
   }
 
-  void _open(Playlist p) => Navigator.of(context)
-      .push(MaterialPageRoute(builder: (_) => PlaylistDetail(playlist: p)));
+  Future<void> _open(Playlist p) async {
+    final changed = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(builder: (_) => PlaylistDetail(playlist: p)));
+    if (changed == true && mounted) _load();
+  }
+
+  Future<void> _create() async {
+    final id = await showCreatePlaylistDialog(context);
+    if (id != null) _load();
+  }
 
   List<Widget> _section(String title, List<Playlist> items, {bool smart = false}) {
     if (items.isEmpty) return const [];
@@ -191,6 +202,13 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
           IconButton(onPressed: _load, icon: const Icon(Icons.refresh)),
         ],
       ),
+      floatingActionButton: app.connected
+          ? FloatingActionButton.extended(
+              onPressed: _create,
+              icon: const Icon(Icons.add),
+              label: Text(t.createPlaylist),
+            )
+          : null,
       body: MaxWidth(maxWidth: 900, child: body),
     );
   }

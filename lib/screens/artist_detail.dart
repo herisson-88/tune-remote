@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../state/app_state.dart';
 import '../widgets/cover.dart';
 import '../widgets/favorite_button.dart';
+import '../widgets/mini_player.dart';
 import 'album_detail.dart';
 
 class ArtistDetail extends StatefulWidget {
@@ -29,7 +30,9 @@ class _ArtistDetailState extends State<ArtistDetail> {
   Future<void> _load() async {
     try {
       final c = context.read<AppState>().client!;
-      final a = await c.streamingArtistAlbums(widget.artist.source, widget.artist.id);
+      final a = widget.artist.source == 'local'
+          ? await c.localArtistAlbums(widget.artist.id)
+          : await c.streamingArtistAlbums(widget.artist.source, widget.artist.id);
       if (mounted) setState(() => _albums = a);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
@@ -88,6 +91,7 @@ class _ArtistDetailState extends State<ArtistDetail> {
                         );
                       },
                     ),
+      bottomNavigationBar: const MiniPlayer(),
     );
   }
 }

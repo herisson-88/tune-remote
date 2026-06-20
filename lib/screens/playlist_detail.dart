@@ -12,6 +12,9 @@ class PlaylistDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.read<AppState>().client!;
+    final isLocal = playlist.source == 'local';
+    // Smart (dynamic) playlists are read-only; everything else is editable.
+    final editable = playlist.source != 'smart';
     return TracksDetailScreen(
       title: playlist.name,
       subtitle: [
@@ -29,6 +32,17 @@ class PlaylistDetail extends StatelessWidget {
             return c.streamingPlaylistTracks(playlist.source, playlist.id);
         }
       },
+      onDelete: !editable
+          ? null
+          : () => isLocal
+              ? c.deleteLocalPlaylist(playlist.id)
+              : c.deleteStreamingPlaylist(playlist.source, playlist.id),
+      onRemoveTrack: !editable
+          ? null
+          : (index, track) => isLocal
+              ? c.removeLocalPlaylistTrack(playlist.id, index)
+              : c.removeStreamingPlaylistTracks(
+                  playlist.source, playlist.id, [track.sourceId]),
     );
   }
 }

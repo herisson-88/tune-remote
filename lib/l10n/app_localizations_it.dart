@@ -221,6 +221,72 @@ class AppLIt extends AppL {
   String get metadataSaved => 'Metadati salvati';
 
   @override
+  String get localLibrary => 'Libreria locale';
+
+  @override
+  String get localLibraryDesc => 'Cartelle in cui il server cerca la musica';
+
+  @override
+  String get musicFolders => 'Cartelle scansionate';
+
+  @override
+  String get addFolder => 'Aggiungi una cartella';
+
+  @override
+  String get noFolders => 'Nessuna cartella configurata';
+
+  @override
+  String get runScan => 'Scansiona libreria';
+
+  @override
+  String get scanning => 'Scansione…';
+
+  @override
+  String get pickFolder => 'Scegli una cartella';
+
+  @override
+  String get addThisFolder => 'Aggiungi questa cartella';
+
+  @override
+  String get createPlaylist => 'Crea una playlist';
+
+  @override
+  String get playlistName => 'Nome della playlist';
+
+  @override
+  String get create => 'Crea';
+
+  @override
+  String get addToPlaylist => 'Aggiungi a una playlist';
+
+  @override
+  String get newPlaylist => 'Nuova playlist';
+
+  @override
+  String get playlistCreated => 'Playlist creata';
+
+  @override
+  String get addedToPlaylist => 'Aggiunto alla playlist';
+
+  @override
+  String get delete => 'Elimina';
+
+  @override
+  String get deletePlaylist => 'Elimina playlist';
+
+  @override
+  String get deletePlaylistConfirm => 'Eliminare questa playlist?';
+
+  @override
+  String get playlistDeleted => 'Playlist eliminata';
+
+  @override
+  String get trackRemoved => 'Rimosso dalla playlist';
+
+  @override
+  String get removeFromPlaylist => 'Rimuovi dalla playlist';
+
+  @override
   String get logIn => 'Accedi';
 
   @override

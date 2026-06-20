@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../api/models.dart';
 import '../l10n/app_localizations.dart';
 import '../state/app_state.dart';
+import '../widgets/mini_player.dart';
 import '../widgets/responsive.dart';
 
 /// Toggle which metadata fields the server exposes for the local library.
@@ -112,6 +113,7 @@ class _MetadataScreenState extends State<MetadataScreen> {
                     ],
                   ),
                 ),
+      bottomNavigationBar: const MiniPlayer(),
     );
   }
 }

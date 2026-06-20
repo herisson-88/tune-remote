@@ -18,7 +18,9 @@ class AlbumDetail extends StatelessWidget {
           .where((e) => e != null && e.isNotEmpty)
           .join(' · '),
       coverPath: album.coverPath,
-      loadTracks: () => c.streamingAlbumTracks(album.source, album.sourceId),
+      loadTracks: () => album.source == 'local'
+          ? c.localAlbumTracks(album.sourceId)
+          : c.streamingAlbumTracks(album.source, album.sourceId),
       favoriteSource: album.source,
       favoriteType: 'albums',
       favoriteId: album.sourceId,

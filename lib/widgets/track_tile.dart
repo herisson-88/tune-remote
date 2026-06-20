@@ -6,14 +6,23 @@ import '../l10n/app_localizations.dart';
 import '../state/app_state.dart';
 import 'cover.dart';
 import 'favorite_button.dart';
+import 'playlist_actions.dart';
 
 /// A track row. Tapping plays it (single) by default, or runs [onTap] if given.
+/// A trailing ⋮ menu exposes "add to playlist" and, when [onRemove] is set
+/// (i.e. shown inside an editable playlist), "remove from playlist".
 class TrackTile extends StatelessWidget {
   final Track track;
   final VoidCallback? onTap;
   final Widget? trailing;
+  final VoidCallback? onRemove;
 
-  const TrackTile({super.key, required this.track, this.onTap, this.trailing});
+  const TrackTile(
+      {super.key,
+      required this.track,
+      this.onTap,
+      this.trailing,
+      this.onRemove});
 
   @override
   Widget build(BuildContext context) {
@@ -109,9 +118,54 @@ class TrackTile extends StatelessWidget {
                 id: track.sourceId,
                 size: 20,
               ),
+              _TrackMenu(track: track, onRemove: onRemove),
             ],
           ),
       onTap: onTap ?? () => playAndToast(context, track),
+    );
+  }
+}
+
+/// The trailing ⋮ overflow menu for a track.
+class _TrackMenu extends StatelessWidget {
+  final Track track;
+  final VoidCallback? onRemove;
+  const _TrackMenu({required this.track, this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppL.of(context);
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert),
+      tooltip: '',
+      onSelected: (v) {
+        if (v == 'add') {
+          showAddToPlaylistSheet(context, track);
+        } else if (v == 'remove') {
+          onRemove?.call();
+        }
+      },
+      itemBuilder: (ctx) => [
+        PopupMenuItem(
+          value: 'add',
+          child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            leading: const Icon(Icons.playlist_add),
+            title: Text(t.addToPlaylist),
+          ),
+        ),
+        if (onRemove != null)
+          PopupMenuItem(
+            value: 'remove',
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              leading: const Icon(Icons.playlist_remove),
+              title: Text(t.removeFromPlaylist),
+            ),
+          ),
+      ],
     );
   }
 }

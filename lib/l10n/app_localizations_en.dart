@@ -221,6 +221,72 @@ class AppLEn extends AppL {
   String get metadataSaved => 'Metadata saved';
 
   @override
+  String get localLibrary => 'Local library';
+
+  @override
+  String get localLibraryDesc => 'Folders the server scans for music';
+
+  @override
+  String get musicFolders => 'Scanned folders';
+
+  @override
+  String get addFolder => 'Add a folder';
+
+  @override
+  String get noFolders => 'No folder configured';
+
+  @override
+  String get runScan => 'Scan library';
+
+  @override
+  String get scanning => 'Scanning…';
+
+  @override
+  String get pickFolder => 'Choose a folder';
+
+  @override
+  String get addThisFolder => 'Add this folder';
+
+  @override
+  String get createPlaylist => 'Create a playlist';
+
+  @override
+  String get playlistName => 'Playlist name';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get addToPlaylist => 'Add to a playlist';
+
+  @override
+  String get newPlaylist => 'New playlist';
+
+  @override
+  String get playlistCreated => 'Playlist created';
+
+  @override
+  String get addedToPlaylist => 'Added to playlist';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get deletePlaylist => 'Delete playlist';
+
+  @override
+  String get deletePlaylistConfirm => 'Delete this playlist?';
+
+  @override
+  String get playlistDeleted => 'Playlist deleted';
+
+  @override
+  String get trackRemoved => 'Removed from playlist';
+
+  @override
+  String get removeFromPlaylist => 'Remove from playlist';
+
+  @override
   String get logIn => 'Log in';
 
   @override

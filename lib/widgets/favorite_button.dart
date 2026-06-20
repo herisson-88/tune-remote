@@ -22,7 +22,7 @@ class FavoriteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (source.isEmpty || source == 'local' || source == 'smart' || id.isEmpty) {
+    if (source.isEmpty || source == 'smart' || id.isEmpty) {
       return const SizedBox.shrink();
     }
     final fav =

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../api/models.dart';
+import '../api/tune_client.dart';
 import '../l10n/app_localizations.dart';
 import '../state/app_state.dart';
 import '../widgets/media_card.dart';
@@ -30,7 +31,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   String? _error;
   bool _loading = false;
   String? _loadedSig; // signature of authenticated services last loaded
-  String? _sourceFilter; // null = all services
+  int _favSeen = -1; // last seen AppState.favVersion
 
   /// Identifies the current set of usable services (host + authenticated names).
   /// Changes whenever a service logs in/out, so favorites reload on auth.
@@ -50,6 +51,33 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     } catch (_) {
       return const [];
     }
+  }
+
+  /// Local favorites are stored as bare (type, id) refs per profile, so each
+  /// has to be hydrated via /library/{type}/{id}. Returns null if none.
+  Future<_Favorites?> _loadLocal(TuneClient c, int profileId) async {
+    final albums = <Album>[];
+    final artists = <Artist>[];
+    final tracks = <Track>[];
+    try {
+      for (final id in await c.localFavoriteIds(profileId, 'track')) {
+        try {
+          tracks.add(await c.localTrackById(id));
+        } catch (_) {}
+      }
+      for (final id in await c.localFavoriteIds(profileId, 'album')) {
+        try {
+          albums.add(await c.localAlbumById(id));
+        } catch (_) {}
+      }
+      for (final id in await c.localFavoriteIds(profileId, 'artist')) {
+        try {
+          artists.add(await c.localArtistById(id));
+        } catch (_) {}
+      }
+    } catch (_) {}
+    if (albums.isEmpty && artists.isEmpty && tracks.isEmpty) return null;
+    return _Favorites('local', albums, artists, tracks);
   }
 
   Future<void> _load() async {
@@ -75,10 +103,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           tracks.map((m) => Track.fromJson(m, source: svc)).toList(),
         ));
       }
+      // Local library favorites: refs are bare IDs, hydrated one by one.
+      final local = await _loadLocal(c, app.profileId);
+      if (local != null) out.add(local);
       if (mounted) {
         setState(() {
           _data = out;
           _loadedSig = _authSig(app);
+          _favSeen = app.favVersion;
         });
       }
     } catch (e) {
@@ -91,60 +123,80 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   void _open(Widget s) =>
       Navigator.of(context).push(MaterialPageRoute(builder: (_) => s));
 
-  Widget _sourceChips() {
-    final data = _data!;
-    final sources = data
-        .where((f) =>
-            f.albums.isNotEmpty || f.artists.isNotEmpty || f.tracks.isNotEmpty)
-        .map((f) => f.service)
-        .toList();
-    if (sources.length < 2) return const SizedBox.shrink();
-    Widget chip(String? src, String label) => Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: ChoiceChip(
-            label: Text(label),
-            selected: _sourceFilter == src,
-            onSelected: (_) => setState(() => _sourceFilter = src),
-          ),
-        );
-    return SizedBox(
-      height: 44,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        children: [
-          chip(null, AppL.of(context).filterAll),
-          for (final s in sources) chip(s, s.toUpperCase()),
-        ],
-      ),
-    );
-  }
+  String _srcLabel(String s) =>
+      s == 'local' ? AppL.of(context).sourceLibrary : s.toUpperCase();
 
-  // Build a tab body that groups [items per service] under service headers.
-  Widget _grouped(
-    bool Function(_Favorites) hasAny,
-    List<Widget> Function(_Favorites) cardsFor,
-    String emptyLabel,
-  ) {
-    final data = _data!;
-    final services = data
-        .where((f) =>
-            (_sourceFilter == null || f.service == _sourceFilter) && hasAny(f))
-        .toList();
-    if (services.isEmpty) return Center(child: Text(emptyLabel));
-    return RefreshIndicator(
-      onRefresh: _load,
-      child: ListView(
-        padding: const EdgeInsets.only(bottom: 24),
+  /// One source's favorites, split into Artists / Albums / Tracks tabs.
+  Widget _sourceFavorites(_Favorites f) {
+    final t = AppL.of(context);
+    Widget tab(bool empty, String emptyLabel, Widget child) => empty
+        ? Center(child: Text(emptyLabel))
+        : RefreshIndicator(onRefresh: _load, child: child);
+
+    return DefaultTabController(
+      length: 3,
+      child: Column(
         children: [
-          for (final f in services) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Text(f.service.toUpperCase(),
-                  style: Theme.of(context).textTheme.titleSmall),
+          TabBar(
+            tabs: [
+              Tab(text: t.tabArtists),
+              Tab(text: t.tabAlbums),
+              Tab(text: t.tabTracks),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                tab(
+                  f.artists.isEmpty,
+                  t.noFavArtists,
+                  ListView(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    children: [
+                      _responsiveCards([
+                        for (final a in f.artists)
+                          (w) => MediaCard(
+                                coverPath: a.picture,
+                                title: a.name,
+                                round: true,
+                                fallback: Icons.person,
+                                width: w,
+                                onTap: () => _open(ArtistDetail(artist: a)),
+                              ),
+                      ]),
+                    ],
+                  ),
+                ),
+                tab(
+                  f.albums.isEmpty,
+                  t.noFavAlbums,
+                  ListView(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    children: [
+                      _responsiveCards([
+                        for (final al in f.albums)
+                          (w) => MediaCard(
+                                coverPath: al.coverPath,
+                                title: al.title,
+                                subtitle: al.artistName,
+                                width: w,
+                                onTap: () => _open(AlbumDetail(album: al)),
+                              ),
+                      ]),
+                    ],
+                  ),
+                ),
+                tab(
+                  f.tracks.isEmpty,
+                  t.noFavTracks,
+                  ListView(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    children: [for (final tr in f.tracks) TrackTile(track: tr)],
+                  ),
+                ),
+              ],
             ),
-            ...cardsFor(f),
-          ],
+          ),
         ],
       ),
     );
@@ -171,7 +223,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   Widget build(BuildContext context) {
     final app = context.watch<AppState>();
     final t = AppL.of(context);
-    if (app.connected && !_loading && _loadedSig != _authSig(app)) {
+    // Reload when the authenticated services change OR any favorite is toggled.
+    if (app.connected &&
+        !_loading &&
+        (_loadedSig != _authSig(app) || _favSeen != app.favVersion)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _load();
       });
@@ -187,86 +242,57 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     } else if (_data == null) {
       body = const SizedBox.shrink();
     } else {
-      body = Column(
-        children: [
-          _sourceChips(),
-          Expanded(
-            child: TabBarView(
-        children: [
-          // Artistes
-          _grouped(
-            (f) => f.artists.isNotEmpty,
-            (f) => [
-              _responsiveCards([
-                for (final a in f.artists)
-                  (w) => MediaCard(
-                        coverPath: a.picture,
-                        title: a.name,
-                        round: true,
-                        fallback: Icons.person,
-                        width: w,
-                        onTap: () => _open(ArtistDetail(artist: a)),
-                      ),
-              ]),
+      // One group per source that actually has favorites.
+      final groups = _data!
+          .where((f) =>
+              f.albums.isNotEmpty || f.artists.isNotEmpty || f.tracks.isNotEmpty)
+          .toList();
+      if (groups.isEmpty) {
+        // Empty placeholder so the type tabs still render their empty states.
+        body = _sourceFavorites(_Favorites('', const [], const [], const []));
+      } else if (groups.length == 1) {
+        body = _sourceFavorites(groups.first);
+      } else {
+        // Outer tabs = sources (Bibliothèque, Qobuz, Tidal…).
+        body = DefaultTabController(
+          length: groups.length,
+          child: Column(
+            children: [
+              Material(
+                color: Theme.of(context).colorScheme.surface,
+                child: TabBar(
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  tabs: [for (final g in groups) Tab(text: _srcLabel(g.service))],
+                ),
+              ),
+              Expanded(
+                child: TabBarView(
+                  children: [for (final g in groups) _sourceFavorites(g)],
+                ),
+              ),
             ],
-            t.noFavArtists,
           ),
-          // Albums
-          _grouped(
-            (f) => f.albums.isNotEmpty,
-            (f) => [
-              _responsiveCards([
-                for (final al in f.albums)
-                  (w) => MediaCard(
-                        coverPath: al.coverPath,
-                        title: al.title,
-                        subtitle: al.artistName,
-                        width: w,
-                        onTap: () => _open(AlbumDetail(album: al)),
-                      ),
-              ]),
-            ],
-            t.noFavAlbums,
-          ),
-          // Titres
-          _grouped(
-            (f) => f.tracks.isNotEmpty,
-            (f) => [for (final tr in f.tracks) TrackTile(track: tr)],
-            t.noFavTracks,
-          ),
-        ],
-            ),
-          ),
-        ],
-      );
+        );
+      }
     }
 
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(t.favoritesTitle),
-          actions: [
-            if (_loading)
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2)),
-              ),
-            IconButton(onPressed: _load, icon: const Icon(Icons.refresh)),
-          ],
-          bottom: TabBar(
-            tabs: [
-              Tab(text: t.tabArtists),
-              Tab(text: t.tabAlbums),
-              Tab(text: t.tabTracks),
-            ],
-          ),
-        ),
-        body: MaxWidth(maxWidth: 1100, child: body),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(t.favoritesTitle),
+        actions: [
+          if (_loading)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2)),
+            ),
+          IconButton(onPressed: _load, icon: const Icon(Icons.refresh)),
+        ],
       ),
+      body: MaxWidth(maxWidth: 1100, child: body),
     );
   }
 }

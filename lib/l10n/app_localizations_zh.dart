@@ -218,6 +218,72 @@ class AppLZh extends AppL {
   String get metadataSaved => '元数据已保存';
 
   @override
+  String get localLibrary => '本地音乐库';
+
+  @override
+  String get localLibraryDesc => '服务器扫描音乐的文件夹';
+
+  @override
+  String get musicFolders => '已扫描的文件夹';
+
+  @override
+  String get addFolder => '添加文件夹';
+
+  @override
+  String get noFolders => '未配置文件夹';
+
+  @override
+  String get runScan => '扫描音乐库';
+
+  @override
+  String get scanning => '扫描中…';
+
+  @override
+  String get pickFolder => '选择文件夹';
+
+  @override
+  String get addThisFolder => '添加此文件夹';
+
+  @override
+  String get createPlaylist => '创建播放列表';
+
+  @override
+  String get playlistName => '播放列表名称';
+
+  @override
+  String get create => '创建';
+
+  @override
+  String get addToPlaylist => '添加到播放列表';
+
+  @override
+  String get newPlaylist => '新建播放列表';
+
+  @override
+  String get playlistCreated => '播放列表已创建';
+
+  @override
+  String get addedToPlaylist => '已添加到播放列表';
+
+  @override
+  String get delete => '删除';
+
+  @override
+  String get deletePlaylist => '删除播放列表';
+
+  @override
+  String get deletePlaylistConfirm => '删除此播放列表？';
+
+  @override
+  String get playlistDeleted => '播放列表已删除';
+
+  @override
+  String get trackRemoved => '已从播放列表移除';
+
+  @override
+  String get removeFromPlaylist => '从播放列表移除';
+
+  @override
   String get logIn => '登录';
 
   @override

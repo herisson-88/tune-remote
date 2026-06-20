@@ -222,6 +222,72 @@ class AppLEs extends AppL {
   String get metadataSaved => 'Metadatos guardados';
 
   @override
+  String get localLibrary => 'Biblioteca local';
+
+  @override
+  String get localLibraryDesc => 'Carpetas donde el servidor busca música';
+
+  @override
+  String get musicFolders => 'Carpetas escaneadas';
+
+  @override
+  String get addFolder => 'Añadir una carpeta';
+
+  @override
+  String get noFolders => 'Ninguna carpeta configurada';
+
+  @override
+  String get runScan => 'Escanear biblioteca';
+
+  @override
+  String get scanning => 'Escaneando…';
+
+  @override
+  String get pickFolder => 'Elegir una carpeta';
+
+  @override
+  String get addThisFolder => 'Añadir esta carpeta';
+
+  @override
+  String get createPlaylist => 'Crear una lista';
+
+  @override
+  String get playlistName => 'Nombre de la lista';
+
+  @override
+  String get create => 'Crear';
+
+  @override
+  String get addToPlaylist => 'Añadir a una lista';
+
+  @override
+  String get newPlaylist => 'Nueva lista';
+
+  @override
+  String get playlistCreated => 'Lista creada';
+
+  @override
+  String get addedToPlaylist => 'Añadido a la lista';
+
+  @override
+  String get delete => 'Eliminar';
+
+  @override
+  String get deletePlaylist => 'Eliminar lista';
+
+  @override
+  String get deletePlaylistConfirm => '¿Eliminar esta lista?';
+
+  @override
+  String get playlistDeleted => 'Lista eliminada';
+
+  @override
+  String get trackRemoved => 'Quitado de la lista';
+
+  @override
+  String get removeFromPlaylist => 'Quitar de la lista';
+
+  @override
   String get logIn => 'Iniciar sesión';
 
   @override

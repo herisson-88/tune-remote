@@ -48,6 +48,7 @@ class Track {
   final String sourceId;
   final String title;
   final String? artistName;
+  final String? artistId;
   final String? albumId;
   final String? albumTitle;
   final String? coverPath;
@@ -63,6 +64,7 @@ class Track {
     required this.title,
     required this.source,
     this.artistName,
+    this.artistId,
     this.albumId,
     this.albumTitle,
     this.coverPath,
@@ -73,10 +75,13 @@ class Track {
 
   factory Track.fromJson(Map<String, dynamic> j, {required String source}) =>
       Track(
-        sourceId: _s(j['source_id'] ?? j['id']),
+        // Local "now playing" reports `track_id` (no `id`/`source_id`); local
+        // list rows report `id`; streaming rows report `source_id`.
+        sourceId: _s(j['source_id'] ?? j['id'] ?? j['track_id']),
         title: _s(j['title'] ?? j['name']),
         source: source,
         artistName: j['artist_name'] as String? ?? j['artist'] as String?,
+        artistId: (j['artist_id'] ?? j['artist']?['id'])?.toString(),
         albumId: (j['album_id'] ?? j['album']?['id'])?.toString(),
         albumTitle: j['album_title'] as String? ?? j['album'] as String?,
         coverPath: j['cover_path'] as String? ?? j['cover_url'] as String?,
@@ -100,6 +105,7 @@ class Album {
   final String sourceId;
   final String title;
   final String? artistName;
+  final String? artistId;
   final String? coverPath;
   final int? trackCount;
   final int? year;
@@ -110,6 +116,7 @@ class Album {
     required this.title,
     required this.source,
     this.artistName,
+    this.artistId,
     this.coverPath,
     this.trackCount,
     this.year,
@@ -121,6 +128,7 @@ class Album {
         title: _s(j['title'] ?? j['name']),
         source: source,
         artistName: j['artist_name'] as String? ?? j['artist'] as String?,
+        artistId: (j['artist_id'] ?? j['artist']?['id'])?.toString(),
         coverPath: j['cover_path'] as String? ?? j['cover_url'] as String?,
         trackCount: (j['track_count'] as num?)?.toInt(),
         year: (j['year'] as num?)?.toInt(),

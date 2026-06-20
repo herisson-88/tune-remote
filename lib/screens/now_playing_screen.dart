@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../api/models.dart';
 import '../l10n/app_localizations.dart';
 import '../state/app_state.dart';
 import '../widgets/cover.dart';
 import '../widgets/favorite_button.dart';
 import '../widgets/responsive.dart';
 import '../widgets/spectrum_visualizer.dart';
+import 'album_detail.dart';
+import 'artist_detail.dart';
 
 class NowPlayingScreen extends StatefulWidget {
   const NowPlayingScreen({super.key});
@@ -22,6 +25,66 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
   String _fmt(int ms) {
     final s = ms ~/ 1000;
     return '${s ~/ 60}:${(s % 60).toString().padLeft(2, '0')}';
+  }
+
+  /// The zone's now-playing track carries no album/artist IDs, so resolve them
+  /// from the full track detail (local or streaming) before navigating.
+  Future<Track?> _full(Track t) async {
+    final c = context.read<AppState>().client;
+    if (c == null) return null;
+    try {
+      if (t.source == 'local') {
+        final id = int.tryParse(t.sourceId);
+        return id == null ? null : await c.localTrackById(id);
+      }
+      return await c.streamingTrack(t.source, t.sourceId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _openAlbum(Track t) async {
+    final full = await _full(t);
+    final albumId = full?.albumId ?? t.albumId;
+    if (!mounted || albumId == null || albumId.isEmpty) return;
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => AlbumDetail(
+        album: Album(
+          sourceId: albumId,
+          title: t.albumTitle ?? '',
+          source: t.source,
+          artistName: t.artistName,
+          coverPath: t.coverPath,
+        ),
+      ),
+    ));
+  }
+
+  Future<void> _openArtist(Track t) async {
+    final c = context.read<AppState>().client;
+    final full = await _full(t);
+    var artistId = full?.artistId ?? t.artistId;
+    // Streaming tracks (Qobuz) often lack artist_id — resolve it via the album.
+    if ((artistId == null || artistId.isEmpty) && t.source != 'local' && c != null) {
+      final albumId = full?.albumId ?? t.albumId;
+      if (albumId != null && albumId.isNotEmpty) {
+        try {
+          artistId = (await c.streamingAlbum(t.source, albumId)).artistId;
+        } catch (_) {}
+      }
+    }
+    if (!mounted) return;
+    if (artistId == null || artistId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppL.of(context).noResults)));
+      return;
+    }
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => ArtistDetail(
+        artist: Artist(
+            id: artistId!, name: t.artistName ?? '', source: t.source),
+      ),
+    ));
   }
 
   @override
@@ -87,14 +150,22 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis),
           const SizedBox(height: 6),
-          Text(
-              [t.artistName, t.albumTitle]
-                  .where((e) => e != null && e.isNotEmpty)
-                  .join(' · '),
-              style: TextStyle(color: cs.onSurfaceVariant),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis),
+          // Artist · Album — both tappable to open their pages.
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              if (t.artistName != null && t.artistName!.isNotEmpty)
+                _LinkText(text: t.artistName!, onTap: () => _openArtist(t)),
+              if (t.artistName != null &&
+                  t.artistName!.isNotEmpty &&
+                  t.albumTitle != null &&
+                  t.albumTitle!.isNotEmpty)
+                Text('  ·  ', style: TextStyle(color: cs.onSurfaceVariant)),
+              if (t.albumTitle != null && t.albumTitle!.isNotEmpty)
+                _LinkText(text: t.albumTitle!, onTap: () => _openAlbum(t)),
+            ],
+          ),
           if (t.quality != null && !t.quality!.isEmpty) ...[
             const SizedBox(height: 10),
             Container(
@@ -223,6 +294,32 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                   const SizedBox(height: 28),
                 ],
               ),
+      ),
+    );
+  }
+}
+
+/// A tappable, lightly-emphasized inline label (artist / album link).
+class _LinkText extends StatelessWidget {
+  final String text;
+  final VoidCallback onTap;
+  const _LinkText({required this.text, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+        child: Text(
+          text,
+          style: TextStyle(
+              color: cs.onSurfaceVariant, fontWeight: FontWeight.w600),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     );
   }

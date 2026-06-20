@@ -171,6 +171,44 @@ class TuneClient {
         .toList();
   }
 
+  /// Single track detail (used to resolve album/artist IDs from now-playing).
+  Future<Track> streamingTrack(String service, String trackId) async {
+    final d = await _get('/streaming/$service/tracks/$trackId')
+        as Map<String, dynamic>;
+    return Track.fromJson(d, source: service);
+  }
+
+  /// Single album detail — carries artist_id (Qobuz tracks don't).
+  Future<Album> streamingAlbum(String service, String albumId) async {
+    final d = await _get('/streaming/$service/albums/$albumId')
+        as Map<String, dynamic>;
+    return Album.fromJson(d, source: service);
+  }
+
+  // ── Local library (source == 'local') ──────────────────────────────
+  // Local content lives under /library and is referenced by integer IDs,
+  // NOT by a streaming service (there is no "local" service in the registry).
+  Future<List<Track>> localAlbumTracks(String albumId) async {
+    final d = await _get('/library/albums/$albumId/tracks') as List;
+    return d
+        .whereType<Map<String, dynamic>>()
+        .map((m) => Track.fromJson(m, source: 'local'))
+        .toList();
+  }
+
+  Future<List<Album>> localArtistAlbums(String artistId) async {
+    final d = await _get('/library/artists/$artistId/albums') as List;
+    return d
+        .whereType<Map<String, dynamic>>()
+        .map((m) => Album.fromJson(m, source: 'local'))
+        .toList();
+  }
+
+  /// Play local tracks by integer ID. A single /play call with the full list
+  /// queues them all and starts the first (local uses track_ids).
+  Future<void> playLocalTracks(int zoneId, List<int> trackIds) =>
+      _post('/zones/$zoneId/play', {'track_ids': trackIds});
+
   Future<List<Playlist>> localPlaylists() async {
     final d = await _get('/playlists') as List;
     return d
@@ -186,6 +224,53 @@ class TuneClient {
         .map((m) => Track.fromJson(m, source: 'local'))
         .toList();
   }
+
+  // ── Playlist creation / editing ────────────────────────────────────
+  /// Create a local playlist → returns its id.
+  Future<String> createLocalPlaylist(String name, {String? description}) async {
+    final d = await _post('/playlists', {
+      'name': name,
+      if (description != null && description.isNotEmpty) 'description': description,
+    }) as Map<String, dynamic>;
+    return d['id'].toString();
+  }
+
+  /// Add local tracks (integer IDs) to a local playlist.
+  Future<void> addLocalPlaylistTracks(String playlistId, List<int> trackIds) =>
+      _post('/playlists/$playlistId/tracks', {'track_ids': trackIds})
+          .then((_) {});
+
+  /// Create a streaming-service playlist (e.g. Qobuz) → returns its id.
+  Future<String> createStreamingPlaylist(String service, String name,
+      {String? description}) async {
+    final d = await _post('/streaming/$service/playlists', {
+      'name': name,
+      if (description != null && description.isNotEmpty) 'description': description,
+    }) as Map<String, dynamic>;
+    return d['id'].toString();
+  }
+
+  /// Add streaming tracks (string IDs) to a streaming playlist.
+  Future<void> addStreamingPlaylistTracks(
+          String service, String playlistId, List<String> trackIds) =>
+      _post('/streaming/$service/playlists/$playlistId/tracks',
+          {'track_ids': trackIds}).then((_) {});
+
+  Future<void> deleteLocalPlaylist(String id) => _delete('/playlists/$id');
+
+  Future<void> deleteStreamingPlaylist(String service, String id) =>
+      _delete('/streaming/$service/playlists/$id');
+
+  /// Remove a local playlist track by its position (0-based index).
+  Future<void> removeLocalPlaylistTrack(String playlistId, int position) =>
+      _post('/playlists/$playlistId/tracks/remove', {'position': position})
+          .then((_) {});
+
+  /// Remove streaming tracks by their source IDs (backend resolves them).
+  Future<void> removeStreamingPlaylistTracks(
+          String service, String playlistId, List<String> trackIds) =>
+      _post('/streaming/$service/playlists/$playlistId/tracks/remove',
+          {'track_ids': trackIds}).then((_) {});
 
   /// Dynamic ("smart") playlists — rule-based local library lists.
   Future<List<Playlist>> smartPlaylists() async {
@@ -227,6 +312,52 @@ class TuneClient {
       _delete(
           '/streaming/$service/favorites/$type/${Uri.encodeComponent(itemId)}');
 
+  // ── Local library favorites (profile-scoped) ───────────────────────
+  // Local favorites live in the `favorites` table keyed by the active profile,
+  // with SINGULAR item types ('track'|'album'|'artist'). They are separate
+  // from the per-streaming-service favorites above.
+  Future<int> activeProfileId() async {
+    try {
+      final d = await _get('/profiles/active') as Map<String, dynamic>;
+      return (d['active_profile_id'] as num?)?.toInt() ?? 1;
+    } catch (_) {
+      return 1;
+    }
+  }
+
+  /// [type] is singular: 'track' | 'album' | 'artist'.
+  Future<List<int>> localFavoriteIds(int profileId, String type) async {
+    final d = await _get('/profiles/$profileId/favorites?item_type=$type') as List;
+    return d
+        .whereType<Map<String, dynamic>>()
+        .map((m) => (m['item_id'] as num?)?.toInt())
+        .whereType<int>()
+        .toList();
+  }
+
+  Future<void> addLocalFavorite(int profileId, String type, int itemId) =>
+      _post('/profiles/$profileId/favorites/add',
+          {'item_type': type, 'item_id': itemId});
+
+  Future<void> removeLocalFavorite(int profileId, String type, int itemId) =>
+      _post('/profiles/$profileId/favorites/remove',
+          {'item_type': type, 'item_id': itemId});
+
+  Future<Track> localTrackById(int id) async {
+    final d = await _get('/library/tracks/$id') as Map<String, dynamic>;
+    return Track.fromJson(d, source: 'local');
+  }
+
+  Future<Album> localAlbumById(int id) async {
+    final d = await _get('/library/albums/$id') as Map<String, dynamic>;
+    return Album.fromJson(d, source: 'local');
+  }
+
+  Future<Artist> localArtistById(int id) async {
+    final d = await _get('/library/artists/$id') as Map<String, dynamic>;
+    return Artist.fromJson(d, source: 'local');
+  }
+
   // ── Zones / outputs ────────────────────────────────────────────────
   Future<List<Zone>> zones() async {
     final d = await _get('/zones') as List;
@@ -259,6 +390,41 @@ class TuneClient {
   Future<void> setStreamQuality(int sampleRate, int bitDepth) => _patch(
       '/system/config',
       {'max_sample_rate': sampleRate, 'max_bit_depth': bitDepth});
+
+  // ── Local library: music folders + scan ────────────────────────────
+  Future<List<String>> musicDirs() async {
+    final d = await _get('/system/music-dirs') as Map<String, dynamic>;
+    return (d['dirs'] as List? ?? const []).map((e) => e.toString()).toList();
+  }
+
+  Future<List<String>> addMusicDir(String path) async {
+    final d = await _post('/system/music-dirs/add', {'path': path})
+        as Map<String, dynamic>;
+    return (d['dirs'] as List? ?? const []).map((e) => e.toString()).toList();
+  }
+
+  Future<List<String>> removeMusicDir(String path) async {
+    final d = await _post('/system/music-dirs/remove', {'path': path})
+        as Map<String, dynamic>;
+    return (d['dirs'] as List? ?? const []).map((e) => e.toString()).toList();
+  }
+
+  Future<void> startScan() => _post('/system/scan').then((_) {});
+
+  Future<Map<String, dynamic>> scanStatus() async {
+    final d = await _get('/system/scan/status');
+    return (d as Map<String, dynamic>?) ?? const {};
+  }
+
+  /// Browse the server's filesystem. Returns {dirs:[{name,path,has_children}],
+  /// parent, current}. [path] null starts from the server's default base.
+  Future<Map<String, dynamic>> browseDirs(String? path) async {
+    final q = (path == null || path.isEmpty)
+        ? ''
+        : '?path=${Uri.encodeQueryComponent(path)}';
+    final d = await _get('/system/browse-dirs$q');
+    return (d as Map<String, dynamic>?) ?? const {};
+  }
 
   // ── Metadata fields ────────────────────────────────────────────────
   Future<List<MetadataCategory>> metadataFields() async {

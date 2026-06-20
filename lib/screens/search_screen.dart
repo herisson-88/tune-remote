@@ -16,7 +16,9 @@ const _sourceLabels = {
   'youtube': 'YouTube',
   'tidal': 'Tidal',
   'deezer': 'Deezer',
-  'local': 'Bibliothèque',
+  'spotify': 'Spotify',
+  'amazon': 'Amazon Music',
+  'amazon_music': 'Amazon Music',
 };
 
 class SearchScreen extends StatefulWidget {
