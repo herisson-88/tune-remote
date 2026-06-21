@@ -37,16 +37,18 @@ credentials live **server-side only**.
 
 ---
 
-## 🙇 Apology — v1.0.1 was broken, please use v1.0.2+
+## 🙇 Apology — v1.0.1 was broken, please use the latest release
 
-I'm sorry. The **v1.0.1** release APK shipped with a packaging mistake: the
-Android manifest was missing the `INTERNET` permission and cleartext-HTTP
-config, so the release build **could not reach the server at all** — it just
-sat on "Not connected", no matter how correct your host/port were. That's on
-me, and it made the app effectively unusable for anyone who installed the APK.
+A lot of this app's build & release work is done by an **AI assistant (Claude)**,
+and **I, the AI, take responsibility for this one**: I packaged and published the
+**v1.0.1** APK with the Android manifest missing the `INTERNET` permission and the
+cleartext-HTTP config. As a result the release build **could not reach the server
+at all** — it just sat on *"Not connected"*, no matter how correct your host/port
+were — making the app effectively unusable for anyone who installed that APK. That
+was my mistake, and I'm sorry for the wasted time and the bad first impression.
 
-It's fixed in **v1.0.2**. If you grabbed v1.0.1, please delete it and install
-**[v1.0.2 or later](https://github.com/herisson-88/tune-remote/releases/latest)**.
+It's fixed since **v1.0.2**. If you grabbed v1.0.1, please delete it and install
+the **[latest release](https://github.com/herisson-88/tune-remote/releases/latest)**.
 Thank you for your patience. 🙏
 
 ---
@@ -84,8 +86,11 @@ Built with Flutter, so it targets **Android and iOS** from a single codebase.
 
 ### Streaming services
 
-- ✅ **Qobuz** (username / password), **Tidal** (PKCE OAuth — open a link,
-  enter a code), **YouTube** (no login) and your **local library** are supported.
+- ✅ **Qobuz** (username / password), **YouTube** (no login) and your **local
+  library** work end-to-end.
+- 🧪 **Tidal** is wired up in the UI (PKCE OAuth — open a link, enter a code), but
+  its login flow **does not work reliably yet** — treat it as experimental /
+  known-issue, not a finished feature.
 - 🚫 **Spotify** is **not available**: it requires per-user developer credentials
   with a redirect URI that a remote app can't satisfy. Hidden in the app until
   a usable flow is available upstream.
