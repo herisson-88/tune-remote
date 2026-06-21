@@ -460,6 +460,9 @@ class TuneClient {
   Future<void> seekZone(int zoneId, int positionMs) =>
       _post('/zones/$zoneId/seek', {'position_ms': positionMs}).then((_) {});
 
+  Future<void> setVolume(int zoneId, double volume) =>
+      _put('/zones/$zoneId/volume', {'volume': volume});
+
   Future<void> clearQueue(int zoneId) => _delete('/zones/$zoneId/queue/clear');
 
   Future<void> addToQueue(int zoneId, String source, String sourceId) =>
