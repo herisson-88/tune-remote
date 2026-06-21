@@ -9,6 +9,15 @@ class AppLEn extends AppL {
   AppLEn([String locale = 'en']) : super(locale);
 
   @override
+  String get genre => 'Genre';
+
+  @override
+  String get label => 'Label';
+
+  @override
+  String get expertPlaylists => 'Expert playlists';
+
+  @override
   String get navSearch => 'Search';
 
   @override

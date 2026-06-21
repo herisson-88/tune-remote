@@ -188,6 +188,29 @@ class Playlist {
       );
 }
 
+/// Discovery context of the now-playing track: its genre and record label
+/// (Qobuz). Lets the full player jump to the genre's expert playlists or the
+/// label's album catalogue.
+class AlbumContext {
+  final String? genreId;
+  final String? genreName;
+  final String? labelId;
+  final String? labelName;
+
+  AlbumContext({this.genreId, this.genreName, this.labelId, this.labelName});
+
+  factory AlbumContext.fromJson(Map<String, dynamic> j) => AlbumContext(
+        genreId: j['genre_id']?.toString(),
+        genreName: j['genre_name'] as String?,
+        labelId: j['label_id']?.toString(),
+        labelName: j['label_name'] as String?,
+      );
+
+  bool get hasGenre =>
+      (genreId ?? '').isNotEmpty && (genreName ?? '').isNotEmpty;
+  bool get hasLabel => (labelName ?? '').isNotEmpty;
+}
+
 /// One service's slice of search results (or a library section).
 class SearchSection {
   final List<Album> albums;

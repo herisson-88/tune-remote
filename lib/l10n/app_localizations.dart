@@ -109,6 +109,24 @@ abstract class AppL {
     Locale('zh'),
   ];
 
+  /// No description provided for @genre.
+  ///
+  /// In en, this message translates to:
+  /// **'Genre'**
+  String get genre;
+
+  /// No description provided for @label.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get label;
+
+  /// No description provided for @expertPlaylists.
+  ///
+  /// In en, this message translates to:
+  /// **'Expert playlists'**
+  String get expertPlaylists;
+
   /// No description provided for @navSearch.
   ///
   /// In en, this message translates to:

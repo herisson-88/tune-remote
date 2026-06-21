@@ -37,6 +37,20 @@ credentials live **server-side only**.
 
 ---
 
+## 🙇 Apology — v1.0.1 was broken, please use v1.0.2+
+
+I'm sorry. The **v1.0.1** release APK shipped with a packaging mistake: the
+Android manifest was missing the `INTERNET` permission and cleartext-HTTP
+config, so the release build **could not reach the server at all** — it just
+sat on "Not connected", no matter how correct your host/port were. That's on
+me, and it made the app effectively unusable for anyone who installed the APK.
+
+It's fixed in **v1.0.2**. If you grabbed v1.0.1, please delete it and install
+**[v1.0.2 or later](https://github.com/herisson-88/tune-remote/releases/latest)**.
+Thank you for your patience. 🙏
+
+---
+
 ## 📱 Platforms
 
 Built with Flutter, so it targets **Android and iOS** from a single codebase.

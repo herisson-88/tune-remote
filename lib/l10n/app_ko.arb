@@ -1,5 +1,8 @@
 {
   "@@locale": "ko",
+  "genre": "장르",
+  "label": "레이블",
+  "expertPlaylists": "전문가 플레이리스트",
   "navSearch": "검색",
   "navPlaylists": "재생목록",
   "navFavorites": "즐겨찾기",

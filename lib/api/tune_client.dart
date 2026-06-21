@@ -185,6 +185,42 @@ class TuneClient {
     return Album.fromJson(d, source: service);
   }
 
+  /// Discovery context (genre + label) resolved from an album (Qobuz).
+  Future<AlbumContext> albumContext(String service, String albumId) async {
+    final d = await _get('/streaming/$service/albums/$albumId/context')
+        as Map<String, dynamic>;
+    return AlbumContext.fromJson(d);
+  }
+
+  /// A record label's full album catalogue, resolved from one of its albums.
+  Future<({String name, List<Album> albums})> albumLabel(
+      String service, String albumId) async {
+    final d = await _get('/streaming/$service/albums/$albumId/label')
+        as Map<String, dynamic>;
+    final albums = (d['albums'] as List? ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map((m) => Album.fromJson(m, source: service))
+        .toList();
+    return (name: (d['name'] as String?) ?? '', albums: albums);
+  }
+
+  /// Curated/editorial ("expert") playlists, optionally filtered by genre/tag.
+  Future<List<Playlist>> featuredPlaylists(String service,
+      {String? genre, String? tag}) async {
+    final q = <String>[
+      if (genre != null && genre.isNotEmpty)
+        'genre=${Uri.encodeQueryComponent(genre)}',
+      if (tag != null && tag.isNotEmpty) 'tag=${Uri.encodeQueryComponent(tag)}',
+    ];
+    final path = '/streaming/$service/featured-playlists'
+        '${q.isEmpty ? '' : '?${q.join('&')}'}';
+    final d = await _get(path) as List;
+    return d
+        .whereType<Map<String, dynamic>>()
+        .map((m) => Playlist.fromJson(m, source: service))
+        .toList();
+  }
+
   // ── Local library (source == 'local') ──────────────────────────────
   // Local content lives under /library and is referenced by integer IDs,
   // NOT by a streaming service (there is no "local" service in the registry).

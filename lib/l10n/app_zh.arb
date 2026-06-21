@@ -1,5 +1,8 @@
 {
   "@@locale": "zh",
+  "genre": "流派",
+  "label": "厂牌",
+  "expertPlaylists": "专家歌单",
   "navSearch": "搜索",
   "navPlaylists": "播放列表",
   "navFavorites": "收藏",

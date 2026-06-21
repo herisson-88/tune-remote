@@ -9,6 +9,15 @@ class AppLZh extends AppL {
   AppLZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get genre => '流派';
+
+  @override
+  String get label => '厂牌';
+
+  @override
+  String get expertPlaylists => '专家歌单';
+
+  @override
   String get navSearch => '搜索';
 
   @override

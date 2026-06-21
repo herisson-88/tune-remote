@@ -9,6 +9,15 @@ class AppLJa extends AppL {
   AppLJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get genre => 'ジャンル';
+
+  @override
+  String get label => 'レーベル';
+
+  @override
+  String get expertPlaylists => 'エキスパートプレイリスト';
+
+  @override
   String get navSearch => '検索';
 
   @override

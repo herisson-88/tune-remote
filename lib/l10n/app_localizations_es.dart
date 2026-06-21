@@ -9,6 +9,15 @@ class AppLEs extends AppL {
   AppLEs([String locale = 'es']) : super(locale);
 
   @override
+  String get genre => 'Género';
+
+  @override
+  String get label => 'Sello';
+
+  @override
+  String get expertPlaylists => 'Playlists de expertos';
+
+  @override
   String get navSearch => 'Buscar';
 
   @override

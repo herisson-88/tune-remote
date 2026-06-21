@@ -10,6 +10,7 @@ import '../widgets/responsive.dart';
 import '../widgets/spectrum_visualizer.dart';
 import 'album_detail.dart';
 import 'artist_detail.dart';
+import 'discovery_screen.dart';
 
 class NowPlayingScreen extends StatefulWidget {
   const NowPlayingScreen({super.key});
@@ -21,6 +22,31 @@ class NowPlayingScreen extends StatefulWidget {
 class _NowPlayingScreenState extends State<NowPlayingScreen> {
   bool _viz = false;
   double? _drag;
+
+  // Discovery context (genre + label) of the current track, loaded lazily.
+  // Qobuz only — local/YouTube tracks have no genre/label.
+  String? _ctxTrackId;
+  String? _ctxAlbumId;
+  AlbumContext? _ctx;
+
+  Future<void> _loadContext(Track t) async {
+    final c = context.read<AppState>().client;
+    if (c == null) return;
+    try {
+      final full = await _full(t);
+      final albumId = full?.albumId ?? t.albumId;
+      if (albumId == null || albumId.isEmpty) return;
+      final ctx = await c.albumContext(t.source, albumId);
+      if (mounted && _ctxTrackId == t.sourceId) {
+        setState(() {
+          _ctx = ctx;
+          _ctxAlbumId = albumId;
+        });
+      }
+    } catch (_) {
+      // Discovery is best-effort; ignore failures (no chips shown).
+    }
+  }
 
   String _fmt(int ms) {
     final s = ms ~/ 1000;
@@ -106,6 +132,16 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       );
     }
 
+    // Load the genre/label discovery context when the track changes (Qobuz).
+    if (_ctxTrackId != t.sourceId) {
+      _ctxTrackId = t.sourceId;
+      _ctx = null;
+      _ctxAlbumId = null;
+      if (t.source == 'qobuz') {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _loadContext(t));
+      }
+    }
+
     final dur = t.durationMs ?? 0;
     final pos = _drag ?? z.positionMs.toDouble();
     final size = MediaQuery.of(context).size;
@@ -179,6 +215,42 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                       color: cs.onPrimaryContainer,
                       fontSize: 12,
                       fontWeight: FontWeight.w600)),
+            ),
+          ],
+          // Genre / Label discovery chips (Qobuz): jump to the genre's expert
+          // playlists or the label's album catalogue.
+          if (_ctx != null && (_ctx!.hasGenre || _ctx!.hasLabel)) ...[
+            const SizedBox(height: 14),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (_ctx!.hasGenre)
+                  ActionChip(
+                    avatar: const Icon(Icons.category_outlined, size: 18),
+                    label: Text(_ctx!.genreName!),
+                    onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => GenrePlaylistsScreen(
+                                  source: t.source,
+                                  genreId: _ctx!.genreId!,
+                                  genreName: _ctx!.genreName!,
+                                ))),
+                  ),
+                if (_ctx!.hasLabel && _ctxAlbumId != null)
+                  ActionChip(
+                    avatar: const Icon(Icons.business_outlined, size: 18),
+                    label: Text(_ctx!.labelName!),
+                    onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => LabelAlbumsScreen(
+                                  source: t.source,
+                                  albumId: _ctxAlbumId!,
+                                  labelName: _ctx!.labelName!,
+                                ))),
+                  ),
+              ],
             ),
           ],
         ],
