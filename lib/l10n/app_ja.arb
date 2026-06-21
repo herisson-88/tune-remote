@@ -1,5 +1,8 @@
 {
   "@@locale": "ja",
+  "genre": "ジャンル",
+  "label": "レーベル",
+  "expertPlaylists": "エキスパートプレイリスト",
   "navSearch": "検索",
   "navPlaylists": "プレイリスト",
   "navFavorites": "お気に入り",

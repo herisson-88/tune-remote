@@ -9,6 +9,15 @@ class AppLIt extends AppL {
   AppLIt([String locale = 'it']) : super(locale);
 
   @override
+  String get genre => 'Genere';
+
+  @override
+  String get label => 'Etichetta';
+
+  @override
+  String get expertPlaylists => 'Playlist degli esperti';
+
+  @override
   String get navSearch => 'Cerca';
 
   @override

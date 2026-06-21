@@ -1,5 +1,8 @@
 {
   "@@locale": "en",
+  "genre": "Genre",
+  "label": "Label",
+  "expertPlaylists": "Expert playlists",
   "navSearch": "Search",
   "navPlaylists": "Playlists",
   "navFavorites": "Favorites",

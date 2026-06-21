@@ -1,5 +1,8 @@
 {
   "@@locale": "it",
+  "genre": "Genere",
+  "label": "Etichetta",
+  "expertPlaylists": "Playlist degli esperti",
   "navSearch": "Cerca",
   "navPlaylists": "Playlist",
   "navFavorites": "Preferiti",

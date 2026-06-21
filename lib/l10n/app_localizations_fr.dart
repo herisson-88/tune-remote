@@ -9,6 +9,15 @@ class AppLFr extends AppL {
   AppLFr([String locale = 'fr']) : super(locale);
 
   @override
+  String get genre => 'Genre';
+
+  @override
+  String get label => 'Label';
+
+  @override
+  String get expertPlaylists => 'Playlists expert';
+
+  @override
   String get navSearch => 'Recherche';
 
   @override

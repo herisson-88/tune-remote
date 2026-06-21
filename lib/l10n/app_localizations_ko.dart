@@ -9,6 +9,15 @@ class AppLKo extends AppL {
   AppLKo([String locale = 'ko']) : super(locale);
 
   @override
+  String get genre => '장르';
+
+  @override
+  String get label => '레이블';
+
+  @override
+  String get expertPlaylists => '전문가 플레이리스트';
+
+  @override
   String get navSearch => '검색';
 
   @override

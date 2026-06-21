@@ -9,6 +9,15 @@ class AppLDe extends AppL {
   AppLDe([String locale = 'de']) : super(locale);
 
   @override
+  String get genre => 'Genre';
+
+  @override
+  String get label => 'Label';
+
+  @override
+  String get expertPlaylists => 'Experten-Playlists';
+
+  @override
   String get navSearch => 'Suche';
 
   @override
