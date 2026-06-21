@@ -84,13 +84,11 @@ Built with Flutter, so it targets **Android and iOS** from a single codebase.
 
 ### Streaming services
 
-- ✅ **Qobuz** (username / password), **YouTube** (no login) and your **local
-  library** are supported.
-- 🚫 **Tidal** and **Spotify** are **not available as of today**: Tune Server has
-  **no working auth flow** for them — Tidal's embedded OAuth client is rejected
-  by Tidal, and Spotify requires per-user developer credentials with a redirect
-  that a remote app can't satisfy. They are therefore hidden in the app until the
-  upstream server ships a usable flow.
+- ✅ **Qobuz** (username / password), **Tidal** (PKCE OAuth — open a link,
+  enter a code), **YouTube** (no login) and your **local library** are supported.
+- 🚫 **Spotify** is **not available**: it requires per-user developer credentials
+  with a redirect URI that a remote app can't satisfy. Hidden in the app until
+  a usable flow is available upstream.
 
 ---
 

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/tune_client.dart';
 import '../api/models.dart';
+import '../api/ws_client.dart';
 
 class AppState extends ChangeNotifier {
   static const _kHostLegacy = 'host'; // pre host/port split
@@ -27,6 +28,7 @@ class AppState extends ChangeNotifier {
   Map<String, StreamingServiceInfo> _services = {};
   int? _currentZoneId;
   Timer? _poll;
+  TuneWebSocket? _ws;
 
   /// Favorite keys: `<source>|<type>|<id>` (type ∈ tracks/albums/artists/playlists).
   final Set<String> _favs = {};
@@ -134,6 +136,7 @@ class AppState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kHost, _host);
     await prefs.setInt(_kPort, _port);
+    _ws?.dispose();
     _client?.close();
     _client = _host.isEmpty ? null : TuneClient(this.host);
     await refresh();
@@ -160,30 +163,39 @@ class AppState extends ChangeNotifier {
         _zones = results[0] as List<Zone>;
         _devices = results[1] as List<Device>;
         _services = results[2] as Map<String, StreamingServiceInfo>
-          // Hidden: OAuth services that can't work from a remote client
-          // (Tidal client rejected by Tidal; Spotify needs a per-user dev app).
-          ..removeWhere((k, _) => k == 'tidal' || k == 'spotify');
+          // Hidden: Spotify needs per-user dev credentials, can't work from remote.
+          // Tidal PKCE works fine server-side (POST /streaming/tidal/auth).
+          ..removeWhere((k, _) => k == 'spotify');
         if (currentZone != null) _currentZoneId = currentZone!.id;
         _startPolling();
         unawaited(loadFavorites());
         unawaited(loadStreamConfig());
       } else {
         _poll?.cancel();
+        _ws?.dispose();
       }
     } catch (e) {
       _error = e.toString();
       _connected = false;
       _poll?.cancel();
+      _ws?.dispose();
     } finally {
       _loading = false;
       notifyListeners();
     }
   }
 
-  // ── Now-playing polling ────────────────────────────────────────────
+  // ── Real-time zone updates (WebSocket primary, polling fallback) ──
   void _startPolling() {
     _poll?.cancel();
-    _poll = Timer.periodic(const Duration(seconds: 2), (_) => _pollZones());
+    _ws?.dispose();
+    final c = _client;
+    if (c == null || host.isEmpty) return;
+    _ws = TuneWebSocket(host, c, (zones) {
+      _zones = zones;
+      notifyListeners();
+    });
+    _ws!.connect();
   }
 
   Future<void> _pollZones() async {
@@ -239,9 +251,18 @@ class AppState extends ChangeNotifier {
     await _pollZones();
   }
 
+  Future<void> setVolume(double volume) async {
+    final c = _client;
+    final z = currentZone;
+    if (c == null || z == null) return;
+    await c.setVolume(z.id, volume);
+    await _pollZones();
+  }
+
   @override
   void dispose() {
     _poll?.cancel();
+    _ws?.dispose();
     super.dispose();
   }
 

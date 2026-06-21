@@ -313,6 +313,37 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       ],
     );
 
+    final volumeRow = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        children: [
+          Icon(
+            z.volume <= 0
+                ? Icons.volume_off
+                : z.volume < 0.5
+                    ? Icons.volume_down
+                    : Icons.volume_up,
+            size: 20,
+            color: cs.onSurfaceVariant,
+          ),
+          Expanded(
+            child: Slider(
+              value: z.volume.clamp(0.0, 1.0),
+              onChanged: z.fixedVolume ? null : (v) => app.setVolume(v),
+            ),
+          ),
+          SizedBox(
+            width: 36,
+            child: Text(
+              '${(z.volume * 100).round()}',
+              style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
+              textAlign: TextAlign.end,
+            ),
+          ),
+        ],
+      ),
+    );
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -346,6 +377,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                           seekBar,
                           const SizedBox(height: 12),
                           controls,
+                          const SizedBox(height: 8),
+                          volumeRow,
                         ],
                       ),
                     ),
@@ -363,6 +396,8 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                   seekBar,
                   const SizedBox(height: 8),
                   controls,
+                  const SizedBox(height: 8),
+                  volumeRow,
                   const SizedBox(height: 28),
                 ],
               ),
