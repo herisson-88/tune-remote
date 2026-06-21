@@ -468,21 +468,27 @@ class TuneClient {
   Future<void> addToQueue(int zoneId, String source, String sourceId) =>
       _post('/zones/$zoneId/queue/add', {'source': source, 'source_id': sourceId});
 
+  /// Batch-add streaming tracks to the queue in a single call.
+  Future<void> addTracksToQueue(int zoneId, List<Track> tracks) =>
+      _post('/zones/$zoneId/queue/add', {
+        'tracks': [
+          for (final t in tracks)
+            {'source': t.source, 'source_id': t.sourceId},
+        ],
+      });
+
   /// Play a list of streaming tracks starting at [startIndex], preserving order.
   Future<void> playTracks(int zoneId, List<Track> tracks, {int startIndex = 0}) async {
     if (tracks.isEmpty) return;
     final start = startIndex.clamp(0, tracks.length - 1);
     final first = tracks[start];
     await playStreamingTrack(zoneId, first.source, first.sourceId);
-    // Append the rest in playback order from the start track.
-    final order = <int>[
-      for (var i = start + 1; i < tracks.length; i++) i,
-      for (var i = 0; i < start; i++) i,
+    final remaining = <Track>[
+      for (var i = start + 1; i < tracks.length; i++) tracks[i],
+      for (var i = 0; i < start; i++) tracks[i],
     ];
-    for (final i in order) {
-      try {
-        await addToQueue(zoneId, tracks[i].source, tracks[i].sourceId);
-      } catch (_) {}
+    if (remaining.isNotEmpty) {
+      await addTracksToQueue(zoneId, remaining);
     }
   }
 
